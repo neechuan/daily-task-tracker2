@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.example.data.AuthRepositoryImpl
 import com.example.data.AuthState
+import com.example.data.FakeAuthApiService
+
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -41,9 +43,15 @@ class AuthViewModelTest {
         context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE).edit().clear().apply()
         context.getSharedPreferences("registered_users", Context.MODE_PRIVATE).edit().clear().apply()
 
-        authRepository = AuthRepositoryImpl(context, ioDispatcher = testDispatcher)
+        authRepository = AuthRepositoryImpl(
+
+            context = context,
+            authApiService = FakeAuthApiService(),
+            ioDispatcher = testDispatcher
+        )
         viewModel = AuthViewModel(authRepository)
     }
+
 
 
     @After

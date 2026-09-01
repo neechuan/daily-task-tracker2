@@ -2,10 +2,12 @@ package com.example.data
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.example.data.network.AuthApiRequest
+import com.example.data.network.AuthApiService
+import com.example.data.network.AuthNetworkClient
 import com.example.model.User
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,12 +24,11 @@ interface AuthRepository {
 }
 
 class AuthRepositoryImpl(
-
     context: Context,
     private val prefs: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE),
+    private val authApiService: AuthApiService = AuthNetworkClient.apiService,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : AuthRepository {
-
 
     companion object {
         private const val PREFS_NAME = "auth_prefs"
@@ -82,6 +83,18 @@ class AuthRepositoryImpl(
             return@withContext Result.failure(IllegalArgumentException(err))
         }
 
+        // Perform HTTP POST request to jsonplaceholder API
+        try {
+            authApiService.mockLogin(
+                AuthApiRequest(
+                    title = "LOGIN",
+                    body = "email=$trimmedEmail"
+                )
+            )
+        } catch (e: Exception) {
+            // Handle network/HTTP exception if needed, but continue gracefully for offline/demo if desired
+        }
+
         val storedPassKey = "user_pass_$trimmedEmail"
         val storedNameKey = "user_name_$trimmedEmail"
         val storedIdKey = "user_id_$trimmedEmail"
@@ -126,6 +139,18 @@ class AuthRepositoryImpl(
             return@withContext Result.failure(IllegalArgumentException(err))
         }
 
+        // Perform HTTP POST request to jsonplaceholder API
+        try {
+            authApiService.mockSignUp(
+                AuthApiRequest(
+                    title = "REGISTER",
+                    body = "email=$trimmedEmail, name=$trimmedName"
+                )
+            )
+        } catch (e: Exception) {
+            // Log/handle network exception gracefully
+        }
+
         val newId = UUID.randomUUID().toString()
         userAccountsPrefs.edit()
             .putString("user_pass_$trimmedEmail", trimmedPassword)
@@ -151,6 +176,18 @@ class AuthRepositoryImpl(
     }
 
     override suspend fun logout() = withContext(ioDispatcher) {
+        val currentUser = getCurrentUser()
+        try {
+            authApiService.mockLogout(
+                AuthApiRequest(
+                    title = "LOGOUT",
+                    body = "user=${currentUser?.email ?: "guest"}"
+                )
+            )
+        } catch (e: Exception) {
+            // Log/handle network exception gracefully
+        }
+
         prefs.edit().clear().apply()
         _authState.value = AuthState.Unauthenticated
     }
