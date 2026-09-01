@@ -1,0 +1,6 @@
+{
+  "name": "Daily Task Tracker",
+  "description": "A clean Material Design daily task tracker with local Room persistence, push notification reminders, and dark mode support.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
