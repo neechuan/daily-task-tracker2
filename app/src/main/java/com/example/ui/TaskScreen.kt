@@ -59,9 +59,13 @@ import com.example.ui.components.TaskFilterChips
 import com.example.ui.components.TaskTopAppBar
 import com.example.ui.components.ThemeSelectionDialog
 
+import com.example.model.User
+
 @Composable
 fun TaskScreen(
     viewModel: TaskViewModel,
+    currentUser: User? = null,
+    onLogout: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -133,9 +137,12 @@ fun TaskScreen(
                         permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                     }
                     viewModel.testReminderNotification(context)
-                }
+                },
+                currentUser = currentUser,
+                onLogout = onLogout
             )
         },
+
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = { viewModel.openAddTask() },

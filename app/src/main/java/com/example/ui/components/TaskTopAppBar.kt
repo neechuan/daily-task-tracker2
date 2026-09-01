@@ -26,6 +26,16 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import com.example.ui.theme.ThemeMode
 
+import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import com.example.model.User
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskTopAppBar(
@@ -36,8 +46,36 @@ fun TaskTopAppBar(
     onToggleSearch: () -> Unit,
     onOpenThemeDialog: () -> Unit,
     onTestNotification: () -> Unit,
+    currentUser: User? = null,
+    onLogout: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+    var showLogoutDialog by remember { mutableStateOf(false) }
+
+    if (showLogoutDialog) {
+        AlertDialog(
+            onDismissRequest = { showLogoutDialog = false },
+            title = { Text("Log Out") },
+            text = { Text("Are you sure you want to log out of Daily Tasks?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showLogoutDialog = false
+                        onLogout()
+                    },
+                    modifier = Modifier.testTag("confirm_logout_button")
+                ) {
+                    Text("Log Out", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showLogoutDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
     TopAppBar(
         modifier = modifier,
         colors = TopAppBarDefaults.topAppBarColors(
@@ -139,8 +177,21 @@ fun TaskTopAppBar(
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+
+                // Logout Action Button
+                IconButton(
+                    onClick = { showLogoutDialog = true },
+                    modifier = Modifier.testTag("logout_button")
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.Logout,
+                        contentDescription = "Log Out",
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
             }
         }
     )
 }
+
 
